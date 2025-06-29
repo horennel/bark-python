@@ -18,7 +18,7 @@ python3 setup.py install
 ```python
 from bark_python import BarkClient, CBCStrategy, EncryptionStrategy
 
-client = BarkClient(device_key="your_device_key")
+client = BarkClient(device_key="your_device_key", api_url="https://api.day.app")
 
 # 设置加密方式（可选，默认明文）
 client.set_encryption(
