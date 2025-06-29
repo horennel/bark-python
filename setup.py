@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='bark_python',
-    version='0.0.1',
+    version='0.0.2',
     description='Bark encrypted push client',
     long_description=open('README.md', encoding='utf-8').read(),  # 读取 README 作为描述
     long_description_content_type='text/markdown',
