@@ -9,6 +9,8 @@
 ## Installation / 安装
 
 ```bash
+pip3 install bark-python
+或者
 git clone https://github.com/horennel/bark-python.git
 python3 setup.py install
 ```
