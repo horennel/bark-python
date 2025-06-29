@@ -18,8 +18,7 @@ setup(
     license='MIT',
     classifiers=[
         'Programming Language :: Python :: 3',
-        'Operating System :: OS Independent',
-        'Topic :: Security :: Utilities :: Communications',
+        'Operating System :: OS Independent'
     ],
     include_package_data=True,
     zip_safe=False,
