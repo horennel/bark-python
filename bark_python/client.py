@@ -129,7 +129,7 @@ class BarkClient(object):
 
     def __init__(self, device_key: str, api_url: str = "https://api.day.app"):
         if not device_key:
-            raise ValueError("Device key is required.")
+            raise InvalidParameterError("Device key is required.")
         self.device_key = device_key
         self.api_url = api_url.rstrip('/')
         self.handler = Default(self.device_key, self.api_url)  # 默认使用不加密的 handler
