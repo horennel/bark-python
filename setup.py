@@ -11,8 +11,8 @@ setup(
     url='https://github.com/horennel/bark-python',
     packages=['bark_python'],
     install_requires=[
-        'requests>=2.25',
-        'pycryptodome>=3.18',
+        'requests~=2.32.4',
+        'pycryptodome~=3.23.0',
     ],
     python_requires='>=3.6',
     license='MIT',
