@@ -5,7 +5,6 @@
 - 支持 AES-128/192/256
 - 支持 加密策略（CBC / ECB，可扩展 GCM 等）
 
----
 
 ## Installation / 安装
 
