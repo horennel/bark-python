@@ -1,3 +1,11 @@
+class EncryptError(Exception):
+    """
+    加密异常的基类。
+    Base exception class for encrypt.
+    """
+    pass
+
+
 class BarkError(Exception):
     """
     所有 Bark 异常的基类。

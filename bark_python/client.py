@@ -17,7 +17,7 @@ class EncryptionStrategy(ABC):
     """
 
     @abstractmethod
-    def encrypt(self, key: bytes, iv: bytes, data: str) -> bytes:
+    def encrypt(self, key: str, iv: str, data: str, other_params: dict) -> bytes:
         pass
 
 
@@ -27,8 +27,9 @@ class CBCStrategy(EncryptionStrategy):
     Encryption strategy using AES-CBC mode.
     """
 
-    def encrypt(self, key: bytes, iv: bytes, data: str) -> bytes:
-        cipher = AES.new(key, AES.MODE_CBC, iv)
+    def encrypt(self, key: str, iv: str, data: str, other_params: dict) -> bytes:
+        key_bytes, iv_bytes = key.encode('utf-8'), iv.encode('utf-8')
+        cipher = AES.new(key_bytes, AES.MODE_CBC, iv_bytes)
         padded = pad(data.encode('utf-8'), AES.block_size)
         return cipher.encrypt(padded)
 
@@ -39,8 +40,9 @@ class ECBStrategy(EncryptionStrategy):
     Encryption strategy using AES-ECB mode.
     """
 
-    def encrypt(self, key: bytes, iv: bytes, data: str) -> bytes:
-        cipher = AES.new(key, AES.MODE_ECB)
+    def encrypt(self, key: str, iv: str, data: str, other_params: dict) -> bytes:
+        key_bytes, iv_bytes = key.encode('utf-8'), iv.encode('utf-8')
+        cipher = AES.new(key_bytes, AES.MODE_ECB)
         padded = pad(data.encode('utf-8'), AES.block_size)
         return cipher.encrypt(padded)
 
@@ -90,20 +92,12 @@ class Encryption(BaseHandler):
     Encrypted notification sender, using injected encryption strategy.
     """
 
-    def __init__(self, device_key, api_url, key, iv, strategy: EncryptionStrategy):
+    def __init__(self, device_key, api_url, key, iv, strategy: EncryptionStrategy, other_params):
         super().__init__(device_key, api_url)
         self.key = key
         self.iv = iv
+        self.other_params = other_params
         self.strategy = strategy  # 策略对象注入
-
-    def _prepare(self):
-        """
-        准备加密参数，将 key 和 iv 编码为 UTF-8 字节。
-        Prepare encryption parameters: encode key and IV to bytes.
-
-        :return: (key_bytes, iv_bytes)
-        """
-        return self.key.encode('utf-8'), self.iv.encode('utf-8')
 
     def send_notification(self, **kwargs):
         """
@@ -113,11 +107,13 @@ class Encryption(BaseHandler):
         :param kwargs: 要加密的键值对参数 / Parameters to encrypt
         :return: 响应文本 / Server response text
         """
-        key_bytes, iv_bytes = self._prepare()
         json_string = json.dumps(kwargs, ensure_ascii=False)
-        ciphertext = self.strategy.encrypt(key_bytes, iv_bytes, json_string)
-        ciphertext_b64 = base64.b64encode(ciphertext).decode('utf-8')
-        kwargs = {'ciphertext': ciphertext_b64, 'iv': self.iv}
+        try:
+            ciphertext = self.strategy.encrypt(self.key, self.iv, json_string, self.other_params)
+            ciphertext_b64 = base64.b64encode(ciphertext).decode('utf-8')
+        except Exception as e:
+            raise EncryptError(e)
+        kwargs = {'ciphertext': ciphertext_b64}
         return self.request(kwargs)
 
 
@@ -136,9 +132,10 @@ class BarkClient(object):
 
     def set_encryption(
             self,
-            key: str,
-            iv: str,
-            strategy_cls: Type[EncryptionStrategy] = CBCStrategy
+            key: str = None,
+            iv: str = None,
+            strategy_cls: Type[EncryptionStrategy] = CBCStrategy,
+            other_params=None
     ):
         """
         设置加密参数和策略实例。
@@ -147,14 +144,13 @@ class BarkClient(object):
         :param key: 加密密钥（16/24/32 长度）/ Key string of length 16/24/32
         :param iv: 初始化向量（长度必须为 16）/ IV string of length 16
         :param strategy_cls: 策略类，默认为 CBC / Strategy class, default is CBC
+        :param other_params: 其他参数，用于自定义加密策略
         :raises InvalidParameterError: 若参数格式错误 / If parameter is invalid
         """
-        if not key or len(key) not in (16, 24, 32):
-            raise InvalidParameterError("Key must be 16/24/32 bytes.")
-        if not iv or len(iv) != 16:
-            raise InvalidParameterError("IV must be 16 bytes.")
+        if other_params is None:
+            other_params = {}
         strategy = strategy_cls()
-        self.handler = Encryption(self.device_key, self.api_url, key, iv, strategy)
+        self.handler = Encryption(self.device_key, self.api_url, key, iv, strategy, other_params)
 
     def send_notification(self, **kwargs):
         """
