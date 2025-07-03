@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bark_python"
+version = "0.0.3"
+description = "Bark encrypted push client"
+readme = { file = "README.md", content-type = "text/markdown" }
+authors = [
+    { name = "horennel", email = "nelsonhoren@gmail.com" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "requests ~=2.32.4",
+    "pycryptodome ~=3.23.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/horennel/bark-python"
+
+[tool.setuptools]
+packages = ["bark_python"]
+include-package-data = true
+zip-safe = false
