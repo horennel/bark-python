@@ -3,8 +3,7 @@
 ## Features / 特性
 
 - 支持 AES-128/192/256
-- 支持 加密策略（CBC / ECB，可扩展 GCM 等）
-
+- 支持 加密策略（CBC / ECB，可自定义 GCM 等）
 
 ## Installation / 安装
 
@@ -24,9 +23,10 @@ client = BarkClient(device_key="your_device_key", api_url="https://api.day.app")
 
 # 设置加密方式（可选，默认明文）
 client.set_encryption(
-    key="1234567890abcdef",  # 必须是 16/24/32 字符
-    iv="abcdef1234567890",  # 必须是 16 字符
-    strategy_cls=CBCStrategy  # 也可以用 ECBStrategy，或者自己扩展
+    key="1234567890abcdef",  # 默认空，AES128[16位]|AES192[24位]|AES256[32位] 字符串
+    iv="abcdef1234567890",  # 默认空，CBC和ECB都为16为字符串
+    strategy_cls=CBCStrategy,  # 也可以用 ECBStrategy，或者自定义
+    other_params={"自定义其他参数": "自定义其他参数"}  # 可以添加自定义参数，用于自定义加密策略
 )
 
 # 发送推送通知
@@ -37,9 +37,10 @@ client.send_notification(
 )
 
 
-# 自定义加密算法（可选）
+# 自定义加密策略（可选）
 class MyNewStrategy(EncryptionStrategy):
-    def encrypt(self, key: bytes, iv: bytes, data: str) -> bytes:
+    def encrypt(self, key: str, iv: str, data: str, other_params: dict) -> bytes:
+        # 返回加密后的bytes数据
         pass
 ```
 
